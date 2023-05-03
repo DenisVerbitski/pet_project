@@ -1,0 +1,19 @@
+.content {
+    position:fixed;
+    width:77%;
+    height:100%;
+    overflow:auto;
+}
+.sidebar {
+    padding: 20px;
+    position:fixed;
+    right:0;
+    top:0;
+    width:20%;
+    height:100%;
+    background:lightgrey;
+    overflow:auto;
+}
+.content::-webkit-scrollbar {
+    width: 0;
+  }
