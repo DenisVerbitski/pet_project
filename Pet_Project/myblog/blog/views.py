@@ -1,10 +1,11 @@
-from django.shortcuts import render, get_object_or_404 
+from django.shortcuts import redirect, render, get_object_or_404 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count  
 from django.core.mail import send_mail 
-from .forms import EmailPostForm, CommentForm
+from .forms import EmailPostForm, CommentForm, SearchForm 
 from .models import Post, Comment
 from taggit.models import Tag 
+from django.contrib.postgres.search import SearchVector 
 
 def post_list(request, tag_slug=None):  
     object_list = Post.published.all()  
@@ -24,11 +25,7 @@ def post_list(request, tag_slug=None):
     except EmptyPage:  
         # Если страница больше максимальной, доставить последнюю страницу результатов  
         posts = paginator.page(paginator.num_pages)  
-    return render(request,  
-		  'blog/post/list.html',  
-		  {'page': page,  
-		  'posts': posts,  
-		  'tag': tag})
+    return render(request,'blog/post/list.html', {'page': page, 'posts': posts, 'tag': tag})
 
 def post_detail(request, year, month, day, post):  
     post = get_object_or_404(Post, slug=post,  
@@ -42,14 +39,16 @@ def post_detail(request, year, month, day, post):
     new_comment = None  
     if request.method == 'POST':
         # Комментарий был опубликован
-        comment_form = CommentForm(data=request.POST)
+        comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
             # Создайте объект Comment, но пока не сохраняйте в базу данных
             new_comment = comment_form.save(commit=False)
             # Назначить текущий пост комментарию
             new_comment.post = post
+            new_comment.user = request.user
              # Сохранить комментарий в базе данных
             new_comment.save()
+            return redirect(request.path)
     else:  
         comment_form = CommentForm() 
     post_tags_ids = post.tags.values_list('id', flat=True)  
@@ -75,3 +74,16 @@ def post_share(request, post_id):
     else:   
         form = EmailPostForm()   
     return render(request, 'blog/post/share.html', {'post': post, 'form': form, 'sent': sent})
+
+def post_search(request): 
+    form = SearchForm() 
+    query = None 
+    results = [] 
+    if 'query' in request.GET: 
+        form = SearchForm(request.GET) 
+        if form.is_valid(): 
+            query = form.cleaned_data['query'] 
+            results = Post.objects.annotate(
+                search=SearchVector('title', 'body'), 
+            ).filter(search=query) 
+    return render(request, 'blog/post/search.html', {'form': form, 'query': query, 'results': results})

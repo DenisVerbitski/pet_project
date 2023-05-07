@@ -4,16 +4,34 @@
   
 {% block content %}  
   {% if sent %}  
-    <h1>E-mail successfully sent</h1>  
+    <h1>E-mail успешно отправлен</h1>  
     <p>  
-      "{{ post.title }}" was successfully sent to {{ form.cleaned_data.to }}.  
+      Пост "{{ post.title }}" успешно отправлен   {{ form.cleaned_data.to }}.<br>  
+      <a href="{% url 'blog:post_list' %}">На главную</a>
     </p>  
   {% else %}  
-    <h1>Share "{{ post.title }}" by e-mail</h1>  
-    <form action="." method="post">  
-      {{ form.as_p }}  
+    <h1>Отправить"{{ post.title }}" на e-mail</h1>  
+    <form action="." method="post"> 
+      <div class="mb-3">
+        <label for="id_name" class="form-label">Имя:</label>
+        <input type="text"  class="form-control" name="name" maxlength="25" required id="id_name">
+      </div>
+      <div class="mb-3">
+        <label for="id_email" class="form-label">Ваш Email:</label>
+        <input type="email" class="form-control" name="email" required id="id_email">
+      </div>
+      <div class="mb-3">
+        <label for="id_to" class="form-label">Email получателя:</label>
+        <input type="email" class="form-control" name="to" required id="id_to">
+      </div>
+      <div class="mb-3">
+        <label for="id_comments" class="form-label">Comments:</label>
+        <textarea name="comments" class="form-control" cols="40" rows="10" id="id_comments"></textarea>
+      </div>
       {% csrf_token %}  
-      <input type="submit" value="Send e-mail">  
+      <p>
+        <input type="submit" value="Отправить" class="btn btn-outline-success">
+      </p>   
     </form>  
   {% endif %}  
 {% endblock %}

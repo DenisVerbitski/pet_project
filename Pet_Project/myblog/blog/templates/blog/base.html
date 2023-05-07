@@ -1,30 +1,76 @@
-{% load blog_tags %}  
-{% load static %}  
+{% load blog_tags %}    
 <!DOCTYPE html>  
-<html>  
+<html lang="ru">  
 <head>  
- <title>{% block title %}{% endblock %}</title>  
- <link href="{% static 'css/style.css' %}" rel="stylesheet">  
+  {% load static %}
+  <meta charset="UTF-8">
+  <title>{% block title %}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet">
+  <link href="{% static 'css/style.css' %}" rel="stylesheet">  
 </head>
-<body>  
-<div class="content">  
-  {% block content %}  
-  {% endblock %}  
-</div>  
-<div class="sidebar">  
-<h2>My blog</h2>  
-<p>This is my blog. I've written {% total_posts %} posts so far.</p>  
-<h3>Latest posts</h3>  
-{% show_latest_posts 3 %}
-<h3>Most commented posts</h3>  
-{% get_most_commented_posts as most_commented_posts %}  
-<ul>  
-  {% for post in most_commented_posts %}  
-  <li>  
-    <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>  
-  </li>  
-  {% endfor %}  
-</ul>
-</div>
+<body>
+  <div class="container overflow-hidden">
+    <div class="row g-0">
+      <div class="shadow-sm mb-2 bg-white rounded">
+        <div class="col-12">
+          <div class="p-3">
+            <div class="row g-0">
+              <div class="col-3">
+                <div class="p-2">
+                  <h3>My blog</h3>
+                </div>
+              </div>
+              <div class="col">
+                <div class="p-2">
+                  <ul class="nav nav-pills nav-justified">
+                    <li class="nav-item">
+                      <a class="nav-link"  aria-current="page" href="{% url 'blog:post_search' %}">Поиск</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="{% url 'blog:post_list' %}">На Главную</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                      <a class="nav-link" href="{% url 'user:logout' %}">Выйти</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                      <a class="nav-link" href="{% url 'user:register_user' %}">Регистрация</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="{% url 'user:login' %}">Вход</a>
+                    </li>
+                    {% endif %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-8">
+        <div class="p-3">
+        {% block content %}  
+        {% endblock %}
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="p-3">
+        <p>В данном блоге вы можете найти {% total_posts %} интересных для прочтения постов.</p>  
+        <h3>Последние посты</h3>  
+        {% show_latest_posts 3 %}
+        <h3>Самые комментируемые посты</h3>  
+        {% get_most_commented_posts as most_commented_posts %} 
+        {% for post in most_commented_posts %} 
+        <div class="list-group">
+          <a href="{{ post.get_absolute_url }}" class="list-group-item list-group-item-action">{{ post.title }}</a>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div> 
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>  
 </html>
